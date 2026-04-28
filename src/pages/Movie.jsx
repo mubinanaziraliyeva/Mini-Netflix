@@ -7,6 +7,7 @@ const API_KEY = "7a2500b77e88ac16b7c20cd7e4a2ef22";
 function Movie() {
   const { id } = useParams();
   const [film, setFilm] = useState(null);
+  const [trailerId, setTrailerId] = useState(null);
 
   useEffect(() => {
     fetch(
@@ -14,6 +15,13 @@ function Movie() {
     )
       .then((res) => res.json())
       .then((data) => setFilm(data));
+
+    fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const trailer = data.results.find((v) => v.type === "Trailer");
+        if (trailer) setTrailerId(trailer.key);
+      });
   }, [id]);
 
   if (!film) return <p className="text-white p-8">Yuklanmoqda...</p>;
@@ -24,6 +32,14 @@ function Movie() {
         background: `linear-gradient(to top, black, transparent), url(https://image.tmdb.org/t/p/original${film.backdrop_path}) center/cover`,
       }}
     >
+      {trailerId && (
+        <iframe
+          src={`https://www.youtube.com/embed/${trailerId}`}
+          className="w-full mt-6 rounded-xl"
+          height="400"
+          allowFullScreen
+        ></iframe>
+      )}
       <div className="max-w-2xl">
         <h1 className="text-5xl font-bold mb-4">{film.title}</h1>
         <p className="text-gray-300 text-lg mb-4">{film.overview}</p>
